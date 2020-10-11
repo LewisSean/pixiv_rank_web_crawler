@@ -5,6 +5,7 @@ this web crawler can search the daily rank of the pixiv, get the target imgs inf
 - step 2: run PixivRankGUI.py
 - step 3: choose the location of your chromedriver
 - step 4: insert in your tags, **Chinese tag** is the best, you can repeatably add tags and view them by button **check added tags** 
+> if you want to get the whole ranking list, simply **don't add any tags**
 - step 5: choose the ranking range in which you do the search, for example, put in 100 means searching your targeted images in **top-100** ranking lists
 - step 6: choose the number of multi-thread, the max num is 24
 - step 7: you can choose targeted rank list by choose **search mode** listbox, choice modes are as follows:
