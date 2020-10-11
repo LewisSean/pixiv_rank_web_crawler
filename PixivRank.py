@@ -227,15 +227,17 @@ class pixiv:
         print('time cost', time_end - time_start, 's')
 
 
-def demo_selenium(url, scrolls, num):
+# scrolls = 2 400~500 imgs
+# scrolls = 3 500 imgs
+def demo_selenium(url, scrolls, num, wait=3):
     driver = webdriver.Chrome("C:/myApps/chromedriver/chromedriver.exe")
     driver.get(url)
     # href = driver.find_elements_by_class_name("ranking-image-item")
 
     for t in range(scrolls):
         scroll(driver, 100000)
-    scroll(driver, 0)
-    time.sleep(2)
+    # scroll(driver, 0)
+    time.sleep(wait)
     hrefs = []
     # 匹配tag为a的所有标签，这些标签的属性class='work  _work  '  且属性target = '_blank'
     for link in driver.find_elements_by_xpath("//a[@href and @target='_blank']"):
