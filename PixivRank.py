@@ -42,12 +42,13 @@ class pixiv:
         # data_uid 作者的uid
         # data_tags 作品的tag
         data_tags = self.sort_tags_cn(_data_details)
+        print(data_tags)
         if have_keyword(data_tags, keywords) or len(keywords) == 0:
             data_url = self.sort_data(re.findall('"url_big":"[^"]*"', _data_details))
             data_uid = str(str(str(re.findall('"user_id":"[^"]*"', _data_details)[0]).split(':', 1)[-1]).strip('"'))
             for url in data_url:
                 _res_que.put([url, _header, data_uid, data_tags])
-                print('add new item')
+                print('   ------->add new item')
 
     def sort_data(self, data):
         _data = []
@@ -127,7 +128,6 @@ class pixiv:
             _threads.append(task)
         for _task in _threads:
             _task.join()
-        print("\nTotal Image: ", self.num)
 
         time_end = time.time()
         print('time cost', time_end - time_start, 's')
@@ -246,7 +246,7 @@ def demo_selenium(url, scrolls, num, wait=3):
             hrefs.append(ref)
 
     driver.quit()
-    hrefs = list(set(hrefs))  # 去重
+    hrefs = sorted(set(hrefs), key=hrefs.index)    # 去重   不可以使用 hrefs = list(set(hrefs)) 会打乱顺序
     print(len(hrefs))
     if len(hrefs) > num:
         hrefs = hrefs[0:num]
@@ -279,9 +279,11 @@ if __name__ == '__main__':
 
     print(items)
 
+    '''
     p = pixiv()
     que = p.multi_info_data(items, ['碧蓝航线', '初音未来', '鬼灭之刃'], 12)
     p.multi_download_img(que, 24)
+    '''
 
     '''p = pixiv()
     path = 'https://www.pixiv.net/artworks/84306692'
