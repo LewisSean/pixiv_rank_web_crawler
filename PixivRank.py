@@ -5,6 +5,7 @@ import queue
 import re
 import os
 from selenium import webdriver
+import json
 
 
 class pixiv:
@@ -43,7 +44,7 @@ class pixiv:
         # data_tags 作品的tag
         data_tags = self.sort_tags_cn(_data_details)
         print(data_tags)
-        if have_keyword(data_tags, keywords) or len(keywords) == 0:
+        if len(keywords) == 0 or have_keyword(data_tags, keywords):
             data_url = self.sort_data(re.findall('"url_big":"[^"]*"', _data_details))
             data_uid = str(str(str(re.findall('"user_id":"[^"]*"', _data_details)[0]).split(':', 1)[-1]).strip('"'))
             for url in data_url:
@@ -161,7 +162,13 @@ class pixiv:
         time_end = time.time()
         print('time cost', time_end - time_start, 's')
 
+    def add_queue(self, _queue, data_list=None):
+        for item in data_list:
+            _item = str(item).strip()
+            if item and _item:
+                _queue.put(_item)
     # ------------------------old version, not effective------------------------------
+    '''
     def data_image(self, url_id):
         _header = self.DefaultHeader.copy()
         # https://www.pixiv.net/member_illust.php?mode=medium&illust_id=84306692
@@ -190,11 +197,6 @@ class pixiv:
                 self.write(str("{}_{}").format(str(data[2]), str(str(data_url).rsplit('/', 1)[-1])), image.read())
                 print(data[3])
 
-    def add_queue(self, _queue, data_list=None):
-        for item in data_list:
-            _item = str(item).strip()
-            if item and _item:
-                _queue.put(_item)
 
     def multi_data(self, data_list=None, keywords=[], max=24):
         time_start = time.time()
@@ -225,6 +227,7 @@ class pixiv:
 
         time_end = time.time()
         print('time cost', time_end - time_start, 's')
+    '''
 
 
 # scrolls = 2 400~500 imgs
@@ -232,7 +235,6 @@ class pixiv:
 def demo_selenium(url, scrolls, num, wait=3):
     driver = webdriver.Chrome("C:/myApps/chromedriver/chromedriver.exe")
     driver.get(url)
-    # href = driver.find_elements_by_class_name("ranking-image-item")
 
     for t in range(scrolls):
         scroll(driver, 100000)
@@ -268,8 +270,55 @@ def have_keyword(item, keywords):
     return False
 
 
+# mode = ['daily', 'weekly', 'monthly', 'rookie', 'original', 'male', 'female']
+# pages start from 1 (ridiculous)
+def get_rank_list_v2(mode, num, tags):
+    pages = int((num-1) / 50 + 1)
+    _threads = []
+    res_que = queue.Queue()
+    for p in range(1, pages+1):  # 前闭后开
+        url = 'https://www.pixiv.net/ranking.php?mode={}&p={}&format=json'.format(mode, p)
+        task = threading.Thread(target=get_pages_id, args=(url, res_que, p))
+        task.setDaemon(True)
+        task.start()
+        _threads.append(task)
+    for _task in _threads:
+        _task.join()
+
+    list = {}
+    while res_que.qsize() > 0:
+        # python 'str' object has no attribute 'read'
+        # json.load(response) or json.loads(response.read())
+        part = res_que.get()
+        list[part[0]] = json.loads(part[1].read())['contents']
+
+    rank_list = []
+    for key in sorted(list.keys()):
+        print(key)
+        for item in list[key]:
+            # print(item['tags'])
+            if len(tags) == 0 or have_keyword(item['tags'], tags):
+                rank_list.append(item['url'][item['url'].rfind('/')+1:item['url'].rfind('_')-3])
+
+    print(rank_list)
+    return rank_list
+
+
+def get_pages_id(url, res_que, id):
+    defaultHeader = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:52.0) Gecko/20100101 Firefox/52.0",
+        "Accept": "*/*",
+        "Accept-Language": "zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3",
+        "Accept-Encoding": "",
+        "Connection": "keep-alive",
+    }
+    res_que.put([id, request.urlopen(request.Request(url, headers=defaultHeader, method='GET'))])
+
+
 if __name__ == '__main__':
-    path = 'https://www.pixiv.net/ranking.php?mode=monthly'
+    get_rank_list_v2('daily', 200, ['Fate'])
+
+    '''path = 'https://www.pixiv.net/ranking.php?mode=monthly'
     refs = demo_selenium(path, 2, 100)
     print(refs)
     items = []
@@ -277,7 +326,8 @@ if __name__ == '__main__':
         ref = ref[ref.rfind('/')+1: len(ref)]
         items.append(ref)
 
-    print(items)
+    print(items)'''
+
 
     '''
     p = pixiv()

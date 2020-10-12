@@ -4,7 +4,7 @@ import tkinter.messagebox as messagebox
 from tkinter.filedialog import askdirectory,askopenfilename
 from tkinter.ttk import Combobox
 import queue
-from PixivRank import pixiv,demo_selenium
+from PixivRank import pixiv,demo_selenium, get_rank_list_v2
 import os
 
 
@@ -97,20 +97,22 @@ class Application(Frame):
 
 
     def search(self):
-        _refs = demo_selenium('https://www.pixiv.net/ranking.php?mode={}'.format(self.mode),
-                              scrolls=self.srcolls, num=self.range, wait=self.wait)
+        # _refs = demo_selenium('https://www.pixiv.net/ranking.php?mode={}'.format(self.mode),
+        #                       scrolls=self.srcolls, num=self.range, wait=self.wait)
+        _refs = get_rank_list_v2(self.mode, self.range, self.tags)
+        '''
         pids = []
         for ref in _refs:
             ref = ref[ref.rfind('/') + 1: len(ref)]
             pids.append(ref)
-
+        '''
         print('search tags:{}'.format(" | ".join(self.tags)))
         print('multi-threads:{}'.format(self.thread))
         print('search website: https://www.pixiv.net/ranking.php?mode={}'.format(self.mode))
-        _que = self._p.multi_info_data(pids, self.tags, self.thread)
+        _que = self._p.multi_info_data(_refs, [], self.thread)
 
         if _que.qsize() == 0:
-            messagebox.showinfo('Message','no result found!')
+            messagebox.showinfo('Message', 'no result found!')
         else:
             self.result = []
             while _que.qsize() > 0:
@@ -120,8 +122,8 @@ class Application(Frame):
         print(self.result)
 
         if len(_refs) < self.range:
-            messagebox.showinfo('Message', 'Fail to get the FULL rank list, due to unreliable network etc.\n '
-                                           'Certain Operation have been made, you can try run again.')
+            # messagebox.showinfo('Message', 'Fail to get the FULL rank list, due to unreliable network etc.\n '
+            #                                'Certain Operation have been made, you can try run again.')
             self.srcolls += 1
             self.wait += 2
 
