@@ -72,8 +72,8 @@ class Application(Frame):
 
         cur_row += 1
         Label(self, text="search mode:").grid(row=cur_row, column=0, sticky="ew")
-        modes = ['daily', 'weekly', 'monthly', 'rookie', 'original', 'male', 'female']
-        self.modeList = Combobox(self,values=modes)
+        self.modes = ['daily', 'weekly', 'monthly', 'rookie', 'original', 'male', 'female']
+        self.modeList = Combobox(self,values=self.modes)
         self.modeList.set('monthly')
         self.modeList.grid(row=cur_row, column=1)
         self.modeButton = Button(self, text='enter', command=self.setMode)
@@ -91,7 +91,7 @@ class Application(Frame):
         self.saveButton.grid(row=cur_row, column=2, sticky="ew")
 
     def setMode(self):
-        _str = self.modeList.current()
+        _str = self.modes[self.modeList.current()]
         if _str != '':
             self.mode = _str
 
@@ -104,9 +104,9 @@ class Application(Frame):
             ref = ref[ref.rfind('/') + 1: len(ref)]
             pids.append(ref)
 
-
-        print(self.tags)
-        print(self.thread)
+        print('search tags:{}'.format(" | ".join(self.tags)))
+        print('multi-threads:{}'.format(self.thread))
+        print('search website: https://www.pixiv.net/ranking.php?mode={}'.format(self.mode))
         _que = self._p.multi_info_data(pids, self.tags, self.thread)
 
         if _que.qsize() == 0:
