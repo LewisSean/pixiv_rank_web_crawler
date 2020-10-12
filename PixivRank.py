@@ -42,13 +42,14 @@ class pixiv:
         # 访问时请求报文必须有Referer，位置是该图片当前的pixiv主页
         # data_uid 作者的uid
         # data_tags 作品的tag
-        data_tags = self.sort_tags_cn(_data_details)
-        print(data_tags)
-        if len(keywords) == 0 or have_keyword(data_tags, keywords):
+        data_tags_cn = self.sort_tags_cn(_data_details)
+        data_tags_japanese = self.sort_tags_japanese(_data_details)
+        print(data_tags_cn)
+        if len(keywords) == 0 or have_keyword(data_tags_cn, keywords) or have_keyword(data_tags_japanese, keywords):
             data_url = self.sort_data(re.findall('"url_big":"[^"]*"', _data_details))
             data_uid = str(str(str(re.findall('"user_id":"[^"]*"', _data_details)[0]).split(':', 1)[-1]).strip('"'))
             for url in data_url:
-                _res_que.put([url, _header, data_uid, data_tags])
+                _res_que.put([url, _header, data_uid, data_tags_cn, data_tags_japanese])
                 print('   ------->add new item')
 
     def sort_data(self, data):

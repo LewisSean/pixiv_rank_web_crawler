@@ -121,11 +121,11 @@ class Application(Frame):
         print("----------------------")
         print(self.result)
 
-        if len(_refs) < self.range:
+        '''if len(_refs) < self.range:
             # messagebox.showinfo('Message', 'Fail to get the FULL rank list, due to unreliable network etc.\n '
             #                                'Certain Operation have been made, you can try run again.')
             self.srcolls += 1
-            self.wait += 2
+            self.wait += 2'''
 
     def show(self):
         if len(self.result) > 0:
@@ -133,17 +133,17 @@ class Application(Frame):
             if not os.path.exists(folder):
                 os.mkdir(folder)
 
-            headers = ['img url', 'author id', 'Tags']
-            # data list of 4: 0 image id | 1 header | 2 uid | 3 tags
+            headers = ['img url', 'author id', 'Tags_cn', 'Tags_jp']
+            # data list of 4: 0 image id | 1 header | 2 uid | 3 tags_cn  |  4 tags_jp
             file = os.path.join(folder, str('results.csv'))
-            with open(file, 'w') as f:
+            with open(file, 'w', encoding='utf-8') as f:
                 f_csv = csv.writer(f)
                 f_csv.writerow(headers)
                 for data in self.result:
-                    print(['https://www.pixiv.net/artworks/' + data[0][data[0].rfind('/') + 1:data[0].rfind('_')],
-                     data[2], "  ".join(data[3])])
-                    f_csv.writerow(['https://www.pixiv.net/artworks/'+data[0][data[0].rfind('/')+1:data[0].rfind('_')],
-                                    data[2], "  ".join(data[3])])
+                    print(['https://www.pixiv.net/artworks/' + data[0],
+                     data[2], "  ".join(data[3]), "  ".join(data[4])])
+                    f_csv.writerow(['https://www.pixiv.net/artworks/'+data[0],
+                                    data[2], "  ".join(data[3]), "  ".join(data[4])])
 
     def setThreads(self):
         _thread = int(self.threadInput.get().strip())
