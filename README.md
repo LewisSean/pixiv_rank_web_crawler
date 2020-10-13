@@ -21,4 +21,4 @@ this web crawler can search the daily rank of the pixiv, get the target imgs inf
 > 2. Button **results**: write info of targeted images into **./PixivImage/results.csv**
 > 3. Button **save**: save targeted images into **./PixivImage** folder
 ## attention
-It's OK to find a chrome page is opened when click **Button run**, just ignore it.
+~~It's OK to find a chrome page is opened when click **Button run**, just ignore it.~~

@@ -42,15 +42,29 @@ class pixiv:
         # 访问时请求报文必须有Referer，位置是该图片当前的pixiv主页
         # data_uid 作者的uid
         # data_tags 作品的tag
-        data_tags_cn = self.sort_tags_cn(_data_details)
+        # data_tags_cn = self.sort_tags_cn(_data_details)
+        data_tags_pairs: dict = self.get_tag_translation_pairs(_data_details)
+        data_tags_cn = data_tags_pairs.keys()
         data_tags_japanese = self.sort_tags_japanese(_data_details)
         print(data_tags_cn)
         if len(keywords) == 0 or have_keyword(data_tags_cn, keywords) or have_keyword(data_tags_japanese, keywords):
             data_url = self.sort_data(re.findall('"url_big":"[^"]*"', _data_details))
             data_uid = str(str(str(re.findall('"user_id":"[^"]*"', _data_details)[0]).split(':', 1)[-1]).strip('"'))
             for url in data_url:
-                _res_que.put([url, _header, data_uid, data_tags_cn, data_tags_japanese])
+                _res_que.put([url, _header, data_uid, data_tags_cn, data_tags_japanese, data_tags_pairs])
                 print('   ------->add new item')
+
+    def get_tag_translation_pairs(self, data):
+        tags = re.findall('"display_tags":\[[^\]]*\]', data)
+        print(tags[0])
+        mydict = json.loads('{'+tags[0]+'}')
+        tag_pairs: dict = {}
+        for tag in mydict['display_tags']:
+            if 'translation' in tag.keys():
+                tag_pairs[tag['translation']] = tag['tag']
+
+        return tag_pairs
+
 
     def sort_data(self, data):
         _data = []
@@ -70,14 +84,12 @@ class pixiv:
 
     def sort_tags_cn(self, data):
         display_tags = re.findall('"display_tags":\[[^\[\]]*', data)
-        if len(display_tags) > 0:
-            tags = re.findall('"translation":[^,]*', display_tags[0])
-            tags_unicode = []
-            for tag in tags:
-                # DeprecationWarning: invalid escape sequence '\/'  source: Fate/GO   23333333
-                tags_unicode.append(tag[15:len(tag) - 1].encode('utf-8').decode('unicode_escape'))
-            return tags_unicode
-        return None
+        tags = re.findall('"translation":[^,]*', display_tags[0])
+        tags_unicode = []
+        for tag in tags:
+            # DeprecationWarning: invalid escape sequence '\/'  source: Fate/GO   23333333
+            tags_unicode.append(tag[15:len(tag) - 1].encode('utf-8').decode('unicode_escape'))
+        return tags_unicode
 
     # data list of 4: 0 image id | 1 header | 2 uid | 3 tags
     def get_data_by_item_thread(self, data):
@@ -317,7 +329,10 @@ def get_pages_id(url, res_que, id):
 
 
 if __name__ == '__main__':
-    get_rank_list_v2('daily', 200, ['Fate'])
+    # get_rank_list_v2('daily', 200, ['Fate'])
+    p = pixiv()
+    _data_details = p._http("https://www.pixiv.net/touch/ajax/illust/details?illust_id=84949432", p.DefaultHeader)
+    print(p.get_tag_translation_pairs(_data_details))
 
     '''path = 'https://www.pixiv.net/ranking.php?mode=monthly'
     refs = demo_selenium(path, 2, 100)

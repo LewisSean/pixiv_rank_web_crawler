@@ -1,4 +1,5 @@
 import csv
+import json
 from tkinter import *
 import tkinter.messagebox as messagebox
 from tkinter.filedialog import askdirectory,askopenfilename
@@ -23,6 +24,10 @@ class Application(Frame):
         self.thread = 24
         self.maxThreads = 24
         self.path = "C:/myApps/chromedriver/chromedriver.exe"
+        f = open('tags.txt', 'r', encoding='utf-8')
+        self.translation: dict = json.loads(f.readline())
+        f.close()
+
         Frame.__init__(self, master)
         self.pack()
         self.createWidgets()
@@ -165,8 +170,8 @@ class Application(Frame):
 
     def addTags(self):
         _str = self.tagInput.get().strip()
-        if _str != '':
-            self.tags.append(_str)
+        if _str != '' and self.translation[_str]:
+            self.tags.append(self.translation[_str])
             self.tagInput.delete(0, END)
 
     def getTags(self):
@@ -182,6 +187,13 @@ class Application(Frame):
             for item in self.result:
                 task_que.put(item)
             self._p.multi_download_img(task_que,self.thread)
+
+
+
+
+def transfer(tag):
+
+    return tag
 
 
 app = Application()
